@@ -19,13 +19,13 @@ async function connect_to_db() {
 async function create_todo(name = "name", description = "description") {
     try {
         const connection = await connect_to_db()
-        const result = await connection.execute("INSERT INTO todos (name, description) VALUES (?, ?)", [
+        const [ResultSetHeader] = await connection.execute("INSERT INTO todos (name, description) VALUES (?, ?)", [
             `${name}`,
             `${description}`,
         ])
         connection.unprepare()
         connection.end()
-        console.log(result)
+        return ResultSetHeader["insertId"]
     } catch (error) {
         throw error
     }
@@ -42,7 +42,7 @@ async function read_todos() {
     }
 }
 
-async function read_todo_by_id(id = 0) {
+async function read_todo(id = 0) {
     if (id === 0) return null
     try {
         const connection = await connect_to_db()
@@ -60,11 +60,10 @@ async function update_todo(chage_name = "", change_description = "", todo_id = 0
     if (todo_id == 0 || (chage_name === "" && change_description === "")) return false
     try {
         const connection = await connect_to_db()
-        const [result, fields] = await connection.execute("SELECT id FROM todos WHERE id=?", [todo_id])
+        const [result, _] = await connection.execute("SELECT id FROM todos WHERE id=?", [todo_id])
         if (result.length === 0) return false
         row = result[0]
         let {id, name, description} = row
-        console.log(id)
         if (chage_name !== "") name = chage_name
         if (change_description !== "") description = change_description
         const done = await connection.execute("UPDATE `todos` SET `name` = ?, `description` = ? WHERE `id` = ?", [
@@ -96,7 +95,8 @@ async function delete_todo(id = 0) {
 }
 
 async function main() {
-    const done = await delete_todo(3)
-    console.log(done)
+    // const r = await update_todo("updated name", "updated description", 2)
+    const r = await read_todos()
+    console.log(r)
 }
 main()
