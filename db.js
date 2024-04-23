@@ -60,7 +60,7 @@ async function update_todo(chage_name = "", change_description = "", todo_id = 0
     if (todo_id == 0 || (chage_name === "" && change_description === "")) return false
     try {
         const connection = await connect_to_db()
-        const [result, fields] = await connection.execute("SELECT * FROM todos WHERE id=?", [todo_id])
+        const [result, fields] = await connection.execute("SELECT id FROM todos WHERE id=?", [todo_id])
         if (result.length === 0) return false
         row = result[0]
         let {id, name, description} = row
@@ -80,22 +80,23 @@ async function update_todo(chage_name = "", change_description = "", todo_id = 0
     }
 }
 
-async function test_update() {
-    const connection = await connect_to_db()
-    await connection.execute("UPDATE `todos` SET `name` = ?, `description` = ? WHERE `id` = ?", [
-        "name update perp 33",
-        "description update perp 33",
-        "3",
-    ])
-    connection.unprepare()
-    connection.end()
-    return true
+async function delete_todo(id = 0) {
+    if (id === 0) return false
+    try {
+        const connection = await connect_to_db()
+        const [result, fields] = await connection.execute("SELECT id FROM todos WHERE id=?", [id])
+        if (result.length === 0) return false
+        connection.execute("DELETE FROM `todos` WHERE `id` = ?", [id])
+        connection.unprepare()
+        connection.end()
+        return true
+    } catch (error) {
+        throw error
+    }
 }
 
 async function main() {
-    await update_todo("UPDATE NAME", "", 1)
-    // await test_update()
-    const result = await read_todo_by_id(1)
-    console.log(result)
+    const done = await delete_todo(3)
+    console.log(done)
 }
 main()
