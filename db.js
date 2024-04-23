@@ -35,42 +35,67 @@ async function read_todos() {
     try {
         const connection = await connect_to_db()
         const [rows] = await connection.execute("SELECT * FROM todos")
-        console.log(rows)
+        connection.end()
         return rows
     } catch (error) {
         console.log(error)
     }
 }
 
-function query_db() {
+async function read_todo_by_id(id = 0) {
+    if (id === 0) return null
     try {
-        const connection = connect_to_db()
-        connection.prepare()
+        const connection = await connect_to_db()
+        const [row] = await connection.execute("SELECT * FROM todos WHERE id=?", [id])
+        connection.unprepare()
+        connection.end()
+        if (row.length === 0) return null
+        else return row[0]
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+async function update_todo(chage_name = "", change_description = "", todo_id = 0) {
+    if (todo_id == 0 || (chage_name === "" && change_description === "")) return false
+    try {
+        const connection = await connect_to_db()
+        const [result, fields] = await connection.execute("SELECT * FROM todos WHERE id=?", [todo_id])
+        if (result.length === 0) return false
+        row = result[0]
+        let {id, name, description} = row
+        console.log(id)
+        if (chage_name !== "") name = chage_name
+        if (change_description !== "") description = change_description
+        const done = await connection.execute("UPDATE `todos` SET `name` = ?, `description` = ? WHERE `id` = ?", [
+            name,
+            description,
+            id,
+        ])
+        connection.unprepare()
+        connection.end()
+        return true
     } catch (error) {
         throw error
     }
-    // const sql_query = "CREATE TABLE todos (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), description TEXT)"
-    // con.query("DROP TABLE todos")
-    con.query(sql_query)
-    console.log("Table created")
-    con.query("INSERT INTO todos (name, description) VALUES ('First Task', 'description 1')")
-    console.log("INSERT DONE")
-    // con.query("DROP TABLE todos")
-    // console.log("TABLE DROPED")
 }
 
-async function select_all(CONN) {
-    const [rows, fields] = await CONN.query("SELECT * FROM todos")
-    return [rows, fields]
+async function test_update() {
+    const connection = await connect_to_db()
+    await connection.execute("UPDATE `todos` SET `name` = ?, `description` = ? WHERE `id` = ?", [
+        "name update perp 33",
+        "description update perp 33",
+        "3",
+    ])
+    connection.unprepare()
+    connection.end()
+    return true
 }
 
 async function main() {
-    const conn = await connect_to_db()
-    console.log("DATABASE CONNECTED")
-    const result = await select_all(conn)
-    console.log(result[0])
-    console.log("DONE")
-    conn.end()
+    await update_todo("UPDATE NAME", "", 1)
+    // await test_update()
+    const result = await read_todo_by_id(1)
+    console.log(result)
 }
-
-read_todos()
+main()
