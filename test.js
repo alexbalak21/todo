@@ -17,14 +17,22 @@ function query_db(con) {
     // con.query("DROP TABLE todos")
     con.query(sql_query)
     console.log("Table created")
-    con.query("DROP TABLE todos")
-    console.log("TABLE DROPED")
+    con.query("INSERT INTO todos (name, description) VALUES ('First Task', 'description 1')")
+    console.log("INSERT DONE")
+    // con.query("DROP TABLE todos")
+    // console.log("TABLE DROPED")
+}
+
+async function select_all(CONN) {
+    const [rows, fields] = await CONN.query("SELECT * FROM todos")
+    return [rows, fields]
 }
 
 async function main() {
     const conn = await connect_to_db()
     console.log("DATABASE CONNECTED")
-    query_db(conn)
+    const result = await select_all(conn)
+    console.log(result[0])
     console.log("DONE")
     conn.end()
 }
