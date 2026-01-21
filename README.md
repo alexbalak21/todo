@@ -1,111 +1,151 @@
-# Todo API
+﻿# Todo API
 
-A simple REST API for managing todos, built with Spring Boot 4.0.1 and Java 21.
+A simple Todo API built with Spring Boot, JPA/Hibernate, and PostgreSQL. Includes Docker packaging and deployment guides.
 
 ## Overview
 
-This project provides a RESTful web service for creating, reading, updating, and deleting todo items. It uses Spring Boot with JPA for data persistence and MariaDB as the database backend.
+RESTful service to create, read, update, and delete todo items. Optimized for small footprints with minimal connection pooling and logging. Root endpoint returns a friendly greeting for quick health checks.
 
-## Features
+## Tech Stack
 
-- **Full CRUD Operations**: Create, read, update, and delete todos
-- **Partial Updates**: Use PATCH requests to update specific fields
-- **RESTful API**: Standard HTTP methods for all operations
-- **Database Persistence**: Data stored in MariaDB with JPA/Hibernate ORM
-- **Memory Optimized**: Configured with minimal caching and connection pooling
-
-## Technology Stack
-
-- **Framework**: Spring Boot 4.0.1
-- **Language**: Java 21
-- **Build Tool**: Maven
-- **ORM**: JPA / Hibernate
-- **Database**: MariaDB
-- **Web**: Spring MVC
+- Framework: Spring Boot 4.0.1
+- Language: Java 21
+- Build: Maven (wrapper included)
+- Web: Spring MVC
+- Persistence: Spring Data JPA (Hibernate)
+- Database: PostgreSQL
 
 ## Project Structure
 
 ```
 src/main/java/app/
-├── Application.java              # Spring Boot application entry point
+├── Application.java              # Spring Boot entry point
 ├── controller/
-│   ├── HomeController.java       # Health check endpoint
-│   └── TodoController.java       # Todo REST API endpoints
+│   ├── HomeController.java       # GET / → health greeting
+│   └── TodoController.java       # CRUD + PATCH for todos
 ├── model/
-│   └── Todo.java                 # Todo entity model
+│   └── Todo.java                 # id, title, completed
 └── repository/
-    └── TodoRepository.java       # Data access layer
+    └── TodoRepository.java       # JpaRepository<Todo, Long>
 ```
 
-## API Endpoints
+## Configuration
 
-### Base URL
+All runtime settings are in `src/main/resources/application.properties` and read from environment variables with defaults where applicable:
+
+```
+PORT                         # Web server port (default 8100)
+DATABASE_URL                 # e.g. jdbc:postgresql://localhost:5432/todo
+DATABASE_USERNAME            # DB user
+DATABASE_PASSWORD            # DB password
+```
+
+Example `.env` (local development):
+
+```
+PORT=8100
+DATABASE_URL=jdbc:postgresql://localhost:5432/todo
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=postgres
+```
+
+Windows PowerShell helpers:
+
+```
+./load-env.ps1          # Loads .env into current session
+```
+
+## Build & Run (Local)
+
+Prerequisites: Java 21, PostgreSQL reachable with the env above.
+
+Using Maven Wrapper on Windows:
+
+```powershell
+./mvnw.cmd -q -DskipTests package
+./mvnw.cmd spring-boot:run
+```
+
+Or run the JAR:
+
+```powershell
+java -jar target/Todo-0.0.1-SNAPSHOT.jar
+```
+
+Run tests:
+
+```powershell
+./mvnw.cmd test
+```
+
+## Docker
+
+Dockerfile packages the built JAR and exposes port 8100.
+
+Build image:
+
+```powershell
+docker build -t todo-api .
+```
+
+Run container (maps 8100 and passes DB env):
+
+```powershell
+docker run --rm -p 8100:8100 ^
+  -e PORT=8100 ^
+  -e DATABASE_URL="jdbc:postgresql://host.docker.internal:5432/todo" ^
+  -e DATABASE_USERNAME=postgres ^
+  -e DATABASE_PASSWORD=postgres ^
+  todo-api
+```
+
+Push/pull from Docker Hub: see `docker_itegration.md` for a step-by-step guide. If you have an image like `alexbalak/todo-api:latest`, run it with the same `-e` variables as above.
+
+## API
+
+Base URL (local):
+
 ```
 http://localhost:8100
 ```
 
-### Endpoints
+- GET / → "Hello from Todo API"
+- GET /todos → List all todos
+- GET /todos/{id} → Get one (404 if missing)
+- POST /todos → Create
+- PUT /todos/{id} → Full update
+- PATCH /todos/{id} → Partial update (currently supports `completed`)
+- DELETE /todos/{id} → Delete
 
-#### Get Home
-```
-GET /
-```
-Returns: `"Hello from Spring Boot App"`
+Example payloads:
 
-#### Get All Todos
-```
-GET /todos
-```
-Returns: List of all todos
+Create:
 
-#### Get Todo by ID
-```
-GET /todos/{id}
-```
-Returns: Todo with specified ID (404 if not found)
-
-#### Create Todo
-```
-POST /todos
-Content-Type: application/json
-
+```json
 {
   "title": "Buy groceries",
   "completed": false
 }
 ```
-Returns: Created todo with assigned ID
 
-#### Update Todo (Full)
-```
-PUT /todos/{id}
-Content-Type: application/json
+Full update:
 
+```json
 {
   "title": "Updated title",
   "completed": true
 }
 ```
-Returns: Updated todo (404 if not found)
 
-#### Update Todo (Partial)
-```
-PATCH /todos/{id}
-Content-Type: application/json
+Partial update:
 
+```json
 {
   "completed": true
 }
 ```
-Returns: Updated todo with only specified fields changed (404 if not found)
 
-#### Delete Todo
-```
-DELETE /todos/{id}
-```
-Returns: 204 No Content (404 if not found)
-
-## Todo Model
+## Model
 
 ```json
 {
@@ -115,106 +155,16 @@ Returns: 204 No Content (404 if not found)
 }
 ```
 
-**Fields:**
-- `id` (Long): Unique identifier, auto-generated
-- `title` (String): Description of the todo item
-- `completed` (Boolean): Whether the todo is complete
+## Handy Requests
 
-## Configuration
+Use `src/main/resources/requests.http` for one-click requests in VS Code/IntelliJ. It includes both local and hosted examples.
 
-Database and server settings are configured in `application.properties`:
+## Deployment
 
-```properties
-server.port=8100
-spring.datasource.url=jdbc:mariadb://mysql-alexb.alwaysdata.net:3306/alexb_db
-spring.jpa.hibernate.ddl-auto=update
-```
+- Render: see `DEPLOY_RENDER.md` (set `PORT` and PostgreSQL env vars).
+- Docker Hub workflow: see `docker_itegration.md` (build, tag, push).
 
-**Key Settings:**
-- **Server Port**: 8100
-- **Database**: MariaDB with automatic schema updates
-- **Connection Pool**: HikariCP with max 2 connections (memory optimized)
-- **Logging Level**: INFO (minimal verbosity)
+## Notes
 
-## Building and Running
-
-### Prerequisites
-- Java 21
-- Maven 3.6+
-- MariaDB database access
-
-### Build
-```bash
-mvn clean package
-```
-
-### Run
-```bash
-mvn spring-boot:run
-```
-
-Or run the JAR directly:
-```bash
-java -jar target/Todo-0.0.1-SNAPSHOT.jar
-```
-
-## Testing
-
-Run the test suite:
-```bash
-mvn test
-```
-
-## Example Usage
-
-### Create a Todo
-```bash
-curl -X POST http://localhost:8100/todos \
-  -H "Content-Type: application/json" \
-  -d '{"title": "Learn Spring Boot", "completed": false}'
-```
-
-### Get All Todos
-```bash
-curl http://localhost:8100/todos
-```
-
-### Mark Todo as Completed
-```bash
-curl -X PATCH http://localhost:8100/todos/1 \
-  -H "Content-Type: application/json" \
-  -d '{"completed": true}'
-```
-
-### Delete a Todo
-```bash
-curl -X DELETE http://localhost:8100/todos/1
-```
-
-## Development
-
-This project uses Spring Data JPA for database operations, providing a clean abstraction over Hibernate. The repository layer is minimal and leverages JpaRepository's built-in methods for common CRUD operations.
-
-## Error Handling
-
-- **400 Bad Request**: Invalid request format
-- **404 Not Found**: Todo with specified ID doesn't exist
-- **500 Internal Server Error**: Server-side error
-
-All error responses include appropriate HTTP status codes.
-
-## Performance Optimizations
-
-- HikariCP connection pooling with minimal pool size (2 connections)
-- Hibernate second-level cache disabled to reduce memory usage
-- Query cache disabled
-- SQL formatting disabled for production
-- Minimal logging configuration
-
-## License
-
-Unlicensed
-
-## Support
-
-For issues or questions, refer to the [Spring Boot documentation](https://spring.io/projects/spring-boot) or [Spring Data JPA guide](https://spring.io/guides/gs/accessing-data-jpa/).
+- Error handling returns appropriate HTTP status codes (`404` on missing items, etc.).
+- Hibernate DDL auto is `update`; adjust for production if needed.
