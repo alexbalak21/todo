@@ -1,3 +1,9 @@
+# CORS allowed origin for frontend app
+app.security.allowed-origin=http://localhost:8100
+
+logging.file.name=logs/app.log
+logging.logback.rollingpolicy.clean-history-on-start=true
+
 # 🔧 Enable developer tools (auto restart, live reload, etc.)
 spring.devtools.restart.enabled=true
 spring.devtools.livereload.enabled=true
