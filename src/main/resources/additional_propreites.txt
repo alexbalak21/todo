@@ -45,8 +45,3 @@ logging.level.app.config=DEBUG
 logging.level.CsrfPostCheckLogger=DEBUG
 logging.level.OriginCheckFilter=DEBUG
 logging.level.org.springframework.security.web.csrf=DEBUG
-
-# RENDER DB
-spring.datasource.url=jdbc:postgresql://dpg-d5oca5i4d50c73c7i7vg-a:5432/appdb_8jl5
-spring.datasource.username=alexblack
-spring.datasource.password=YOkF3wdF1NUeKAr3aSuViw97fmksovUm

@@ -1,0 +1,81 @@
+1.BUILD THE APP AND CONNECT IT WITH LOCALHOST DATABASE:
+
+# PostgreSQL connection
+spring.datasource.url=${DATABASE_URL}
+spring.datasource.username=${DATABASE_USERNAME}
+spring.datasource.password=${DATABASE_PASSWORD}
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+use .env to initialize the env variables as :
+
+DATABASE_URL=jdbc:postgresql://localhost:5432/todo
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=root
+PORT=8100
+
+You can use load-env.ps1 script on windows :
+# Load .env file into PowerShell environment variables
+
+Get-Content .env | ForEach-Object {
+    if ($_ -match "^\s*#") { return }   # skip comments
+    if ($_ -match "^\s*$") { return }   # skip empty lines
+    $name, $value = $_ -split "=", 2
+    Set-Item -Path "Env:$name" -Value $value
+}
+
+Write-Host ".env variables loaded into current session."
+
+then run load-env.ps1 in the console
+
+to test your application you can run mvn spring-boot:run
+
+When your app is build and ready to deploy you can build it with: mvn clean package or mvn clean package -DskipTests to skip the Skip tests
+
+your app should be build into /target/app-name-0.0.1-SNAPSHOT.jar
+
+To test your jar you can do java -jar app-name-0.0.1-SNAPSHOT.jar (don't forget to load your env vars)
+
+create your dockerfile:
+
+FROM eclipse-temurin:21-jre-alpine (Java image)
+WORKDIR /app
+COPY target/app-name-0.0.1-SNAPSHOT.jar app.jar (input .jar fil & output jar file)
+EXPOSE 8100
+ENTRYPOINT ["java", "-jar", "app.jar"]
+or to limit the ram usage by the container :
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-Xmx512m", "-jar", "app.jar"]
+
+
+Lunch Docker Desktop:
+
+Docker Commands:
+List containers:
+docker ps
+
+Running + Stopped:
+docker ps -a
+
+
+Stop a container:
+docker stop <container_id_or_name>
+
+Remove a container:
+docker rm <container_id_or_name>
+
+Remove all stopped containers:
+docker container prune
+
+Build container:
+docker build -t <app-name> . (remove <>)
+(-t for tag : its the name)
+
+
+Login into Docker Hub:
+docker login
+
+tag your container:
+docker tag todo-api YOUR_USERNAME/api:latest
+
+
+Push the container to Docker Hub:
+docker push YOUR_USERNAME/todo-api:latest
