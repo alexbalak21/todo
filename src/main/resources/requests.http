@@ -1,5 +1,5 @@
-@host = http://localhost:8100
-@host = https://todo-api-x0p3.onrender.com
+@host = http://localhost:10000
+# @host = https://todo-api-x0p3.onrender.com
 
 
 ### GET /
