@@ -235,7 +235,7 @@ https://hub.docker.com/r/YOUR_USERNAME/todo-api
 2. Click **New +** → **PostgreSQL**
 3. Configure:
    - **Name**: `todo-db` (or any name)
-   - **Database**: `todo`
+   - **Database**: `todo` (or any name)
    - **User**: Auto-generated
    - **Region**: Choose closest to you
    - **Plan**: Free or paid
