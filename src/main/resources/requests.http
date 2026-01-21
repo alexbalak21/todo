@@ -1,17 +1,25 @@
+@host = http://localhost:8100
+@host = https://todo-api-x0p3.onrender.com
+
+
+### GET /
+GET {{host}}/
+
+
 ### GET TODOS
-GET http://localhost:8100/todos
+GET {{host}}/todos
 
 ### POST TODO
-POST http://localhost:8100/todos
+POST {{host}}/todos
 Content-Type: application/json
 
 {
-  "title": "Second Task",
+  "title": "First Task",
   "completed": false
 } 
 
 ### UPDATE TODO
-PUT http://localhost:8100/todos/1
+PUT {{host}}/todos/1
 Content-Type: application/json
 
 {
@@ -20,7 +28,7 @@ Content-Type: application/json
 }
 
 ### PATCH TODO
-PATCH http://localhost:8100/todos/1
+PATCH {{host}}/todos/1
 Content-Type: application/json
 
 {
