@@ -1,0 +1,28 @@
+### GET TODOS
+GET http://localhost:8100/todos
+
+### POST TODO
+POST http://localhost:8100/todos
+Content-Type: application/json
+
+{
+  "title": "New Task",
+  "completed": false
+} 
+
+### UPDATE TODO
+PUT http://localhost:8100/todos/1
+Content-Type: application/json
+
+{
+  "title": "Updated Task",
+  "completed": false
+}
+
+### PATCH TODO
+PATCH http://localhost:8100/todos/1
+Content-Type: application/json
+
+{
+  "completed": true
+}
