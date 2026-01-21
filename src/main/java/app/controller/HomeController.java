@@ -9,6 +9,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String getMethodName() {
-        return "Hello from Spring Boot App";
+        return "Hello from Todo API";
     }
 }
