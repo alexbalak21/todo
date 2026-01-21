@@ -11,8 +11,8 @@
 	<groupId>com.example</groupId>
 	<artifactId>Todo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Todo</name>
-	<description>Simple Todo app</description>
+	<name>Todo API</name>
+	<description>Simple Todo API</description>
 	<url/>
 	<licenses>
 		<license/>
